@@ -39,10 +39,10 @@ struct AllocatedBuffer {
 
 struct Vertex {
     glm::vec3 position;
-    float uv_x;
     glm::vec3 normal;
-    float uv_y;
     glm::vec4 color;
+    float uv_x;
+    float uv_y;
 };
 
 // holds the resources needed for a mesh
@@ -74,8 +74,11 @@ struct MaterialInstance {
 struct DrawContext;
 
 // base class for a renderable dynamic object
-class IRenderable {
+struct IRenderable {
+    virtual ~IRenderable() = default;
     virtual void Draw(const glm::mat4& topMatrix, DrawContext& ctx) = 0;
+
+    using Ptr = std::shared_ptr<IRenderable>;
 };
 
 // implementation of a drawable scene node.
@@ -96,7 +99,7 @@ struct ENode : public IRenderable {
         }
     }
 
-    virtual void Draw(const glm::mat4& topMatrix, DrawContext& ctx) {
+    void Draw(const glm::mat4& topMatrix, DrawContext& ctx) override {
         // draw children
         for (auto& c : children) {
             c->Draw(topMatrix, ctx);

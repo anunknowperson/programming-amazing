@@ -10,17 +10,7 @@ public:
     virtual ~IView() = default;
 
     virtual void run() const = 0;
+    virtual void process_event(const SDL_Event& e) = 0;
 
-    /*! \brief
-     * Prints in console current settings
-     * (level of brightness and RGB)
-     */
-    // virtual void showCurrentSettings() const = 0;
-
-    /*! \brief
-     * Runs user interface that helps user interact with backlight
-     */
-    // virtual void runMenu() const = 0;
-
-    using Ptr = std::unique_ptr<IView>;
+    using Ptr = std::shared_ptr<IView>;
 };

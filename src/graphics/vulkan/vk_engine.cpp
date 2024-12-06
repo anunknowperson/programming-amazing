@@ -1,18 +1,26 @@
 ﻿#include "graphics/vulkan/vk_engine.h"
 
+#include <fastgltf/core.hpp>
+#include <fastgltf/tools.hpp>
+#include <iostream>
+#include <ranges>
+
 #include "core/config.h"
 
 #define VMA_IMPLEMENTATION
+#include <fastgltf/glm_element_traits.hpp>
+
 #include "SDL_vulkan.h"
 #include "VkBootstrap.h"
+#include "graphics/vulkan/RenderableGLTF.h"
 #include "graphics/vulkan/vk_images.h"
 #include "graphics/vulkan/vk_initializers.h"
-#include "graphics/vulkan/vk_loader.h"
 #include "graphics/vulkan/vk_pipelines.h"
 #include "graphics/vulkan/vk_types.h"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_vulkan.h"
+#include "interfaces/IModel.h"
 #include "vk_mem_alloc.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -92,7 +100,6 @@ void VulkanEngine::init_default_data() {
     rect_indices[2] = 2;
 
     auto path_to_assets = std::string(ASSETS_DIR) + "/basicmesh.glb";
-    testMeshes = loadGltfMeshes(this, path_to_assets).value();
 
     // 3 default textures, white, grey, black. 1 pixel each
     uint32_t white = glm::packUnorm4x8(glm::vec4(1, 1, 1, 1));
@@ -491,12 +498,6 @@ void VulkanEngine::init(struct SDL_Window* window) {
 
     mainCamera->pitch = 0;
     mainCamera->yaw = 0;
-
-    std::string structurePath = {std::string(ASSETS_DIR) + "/basicmesh.glb"};
-    auto structureFile = loadGltf(this, structurePath);
-
-    assert(structureFile.has_value());
-    loadedScenes["structure"] = *structureFile;
 
     _isInitialized = true;
 }
@@ -1005,8 +1006,8 @@ void VulkanEngine::draw_geometry(VkCommandBuffer cmd) {
     vkCmdEndRendering(cmd);
 }
 
-void VulkanEngine::draw() {
-    update_scene();
+void VulkanEngine::draw(const IModel::Ptr model) {
+    update_scene(model);
 
     // wait until the gpu has finished rendering the last frame. Timeout of 1
     // second
@@ -1181,12 +1182,12 @@ void VulkanEngine::immediate_submit(
     VK_CHECK(vkWaitForFences(_device, 1, &_immFence, true, 9999999999));
 }
 
-void VulkanEngine::update() {
+void VulkanEngine::update(const IModel::Ptr model) {
     if (resize_requested) {
         resize_swapchain();
     }
 
-    draw();
+    draw(model);
 }
 
 AllocatedImage VulkanEngine::create_image(VkExtent3D size, VkFormat format,
@@ -1393,26 +1394,7 @@ MaterialInstance GLTFMetallic_Roughness::write_material(
     return matData;
 }
 
-void MeshNode::Draw(const glm::mat4& topMatrix, DrawContext& ctx) {
-    glm::mat4 nodeMatrix = topMatrix * worldTransform;
-
-    for (auto& s : mesh->surfaces) {
-        RenderObject def{};
-        def.indexCount = s.count;
-        def.firstIndex = s.startIndex;
-        def.indexBuffer = mesh->meshBuffers.indexBuffer.buffer;
-        def.material = &s.material->data;
-
-        def.transform = nodeMatrix;
-        def.vertexBufferAddress = mesh->meshBuffers.vertexBufferAddress;
-
-        ctx.OpaqueSurfaces.push_back(def);
-    }
-
-    ENode::Draw(topMatrix, ctx);
-}
-
-void VulkanEngine::update_scene() {
+void VulkanEngine::update_scene(const IModel::Ptr& model) {
     mainCamera->update();
 
     glm::mat4 view = mainCamera->getViewMatrix();
@@ -1435,40 +1417,9 @@ void VulkanEngine::update_scene() {
     sceneData.sunlightColor = glm::vec4(1.f);
     sceneData.sunlightDirection = glm::vec4(0, 1, 0.5, 1.f);
 
-    for (const auto& [key, mesh] : meshes) {
-        std::shared_ptr<LoadedGLTF> loadedMesh = mesh;
-        loadedMesh->Draw(transforms[key], mainDrawContext);
+    auto meshes = model->get_meshes();
+    for (const auto& mesh_info : std::views::values(meshes)) {
+        auto renderable_gltf{RenderableGLTF(mesh_info.ptr)};
+        renderable_gltf.Draw(mesh_info.transform, mainDrawContext);
     }
-}
-
-int64_t VulkanEngine::registerMesh(std::string filePath) {
-    std::random_device rd;
-
-    // Use the Mersenne Twister engine for high-quality random numbers
-    std::mt19937_64 generator(rd());
-
-    // Create a uniform distribution for int64_t
-    std::uniform_int_distribution<int64_t> distribution;
-
-    // Generate and print a random int64_t value
-    int64_t random_int64 = distribution(generator);
-
-    std::string structurePath = {std::string(ASSETS_DIR) + filePath};
-    auto structureFile = loadGltf(this, structurePath);
-
-    assert(structureFile.has_value());
-
-    meshes[random_int64] = *structureFile;
-    transforms[random_int64] = glm::mat4(1.0f);
-
-    return random_int64;
-}
-
-void VulkanEngine::unregisterMesh(int64_t id) {
-    meshes.erase(id);
-    transforms.erase(id);
-}
-
-void VulkanEngine::setMeshTransform(int64_t id, glm::mat4 mat) {
-    transforms[id] = mat;
 }

@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "SDL2/SDL.h"
+#include "core/MeshController.h"
 
 /*! \brief
  * Interface for interacting with the chip that allows changing keyboard
@@ -23,57 +24,29 @@ public:
      * \brief Virtual destructor for the interface.
      */
     virtual ~IController() = default;
-
     /*!
-     * \brief Initializes the controller.
-     *
-     * This method initializes the necessary components for the controller.
+     * \brief Renders a new frame
      */
-    virtual void init() const = 0;
-
+    virtual void run() = 0;
     /*!
-     * \brief Updates the controller status.
-     *
-     * This method updates the internal state or status of the controller.
+     * \brief Applies updates
      */
-    virtual void update() const = 0;
-
+    virtual void update() = 0;
     /*!
-     * \brief Processes incoming events.
-     *
-     * \param e Event to be processed.
-     *
-     * This method processes the incoming SDL event and performs necessary
-     * actions.
+     * \brief Gets a controller to interact with meshes
+     * \return Pointer to the MeshController
      */
-    virtual void processEvent(SDL_Event &e) const = 0;
-
+    [[nodiscard]] virtual std::weak_ptr<const MeshController>
+    getMeshController() = 0;
     /*!
-     * \brief Sends data to change the brightness of the backlight.
-     *
-     * \param lvl Level of brightness [0; 100].
-     *
-     * This method sends data to the chip to change the brightness level of the
-     * backlight. The lvl parameter specifies the brightness level from 0 (off)
-     * to 100 (maximum brightness).
+     * \brief Handles user actions (SDL events)
+     * @param e SDL event
      */
-    // virtual void setBrightness(uint16_t lvl) const = 0;
-
-    /*!
-     * \brief Sends data to change the color of the backlight.
-     *
-     * \param color Struct with RGB values (each [0; 255]).
-     *
-     * This method sends data to the chip to change the color of the backlight.
-     * The color parameter is a struct containing RGB values, each ranging from
-     * 0 to 255.
-     */
-    // virtual void setColor(Color color) const = 0;
-
+    virtual void process_event(const SDL_Event& e) = 0;
     /*!
      * \brief Shared pointer type for IController.
      */
-    using Ptr = std::shared_ptr<const IController>;
+    using Ptr = std::shared_ptr<IController>;
 };
 
 IController::Ptr createInstance();

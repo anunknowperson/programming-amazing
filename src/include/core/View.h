@@ -4,4 +4,4 @@
 #include "interfaces/IModel.h"
 #include "interfaces/IView.h"
 
-IView::Ptr createView(IController::Ptr controller, IModel::Ptr model);
+IView::Ptr createView(IModel::Ptr model);

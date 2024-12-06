@@ -2,6 +2,6 @@
 
 #include "core/ControllerImpl.h"
 
-IController::Ptr createController(IModel::Ptr ptr) {
-    return std::make_shared<ControllerImpl>(std::move(ptr));
+IController::Ptr createController(IModel::Ptr model, IView::Ptr view) {
+    return std::make_shared<ControllerImpl>(std::move(model), std::move(view));
 }

@@ -2,10 +2,11 @@
 
 #include <random>
 
-#include "core/Mesh.h"
+#include "RenderableGLTF.h"
+#include "interfaces/IModel.h"
 #include "scene/Camera.h"
+#include "scene/Mesh.h"
 #include "vk_descriptors.h"
-#include "vk_loader.h"
 #include "vk_pipelines.h"
 #include "vk_types.h"
 
@@ -81,12 +82,6 @@ struct GPUSceneData {
     glm::vec4 sunlightColor;
 };
 
-struct MeshNode : public ENode {
-    std::shared_ptr<MeshAsset> mesh;
-
-    virtual void Draw(const glm::mat4& topMatrix, DrawContext& ctx) override;
-};
-
 struct RenderObject {
     uint32_t indexCount;
     uint32_t firstIndex;
@@ -104,23 +99,16 @@ struct DrawContext {
 
 class VulkanEngine {
 public:
-    int64_t registerMesh(std::string filePath);
-    void unregisterMesh(int64_t id);
-
-    void setMeshTransform(int64_t id, glm::mat4 mat);
-
-    std::unordered_map<int64_t, std::shared_ptr<LoadedGLTF>> meshes;
-
-    std::unordered_map<int64_t, glm::mat4> transforms;
-
-    std::unordered_map<std::string, std::shared_ptr<LoadedGLTF>> loadedScenes;
+    std::unordered_map<std::string,
+                       std::shared_ptr<const Mesh::GLTF::LoadedGLTF>>
+            loadedScenes;
 
     Camera* mainCamera;
 
     DrawContext mainDrawContext;
     std::unordered_map<std::string, std::shared_ptr<ENode>> loadedNodes;
 
-    void update_scene();
+    void update_scene(const IModel::Ptr& model);
 
     FrameData _frames[FRAME_OVERLAP];
 
@@ -147,10 +135,10 @@ public:
     void cleanup();
 
     // draw loop
-    void draw();
+    void draw(IModel::Ptr model);
 
     // run main loop
-    void update();
+    void update(IModel::Ptr model);
 
     VkInstance _instance;                       // Vulkan library handle
     VkDebugUtilsMessengerEXT _debug_messenger;  // Vulkan debug output handle
@@ -198,8 +186,6 @@ public:
     void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function);
     GPUMeshBuffers uploadMesh(std::span<uint32_t> indices,
                               std::span<Vertex> vertices);
-
-    std::vector<std::shared_ptr<MeshAsset>> testMeshes;
 
     bool resize_requested;
 

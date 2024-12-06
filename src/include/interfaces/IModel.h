@@ -8,6 +8,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_vulkan.h"
 #include "scene/Camera.h"
+#include "scene/Mesh.h"
 
 /*!
  * \brief Interface for managing models and their integration with Vulkan.
@@ -39,33 +40,52 @@ public:
     virtual void registerWindow(struct SDL_Window* window) = 0;
 
     /*!
-     * \brief Updates Vulkan-related states.
-     *
-     * This method updates internal Vulkan-related states or data structures.
-     * Should be called regularly to keep Vulkan rendering in sync with the
-     * application state.
+     * \brief Loads (parses) a new mesh to the model
+     * \param file_path The path to the mesh
+     * \return Returns render-id of the mesh that helps identify the provided
+     * mesh.
      */
-    virtual void updateVulkan() = 0;
+    virtual Mesh::rid_t createMesh(const std::filesystem::path& file_path) = 0;
+    /*!
+     * \brief Deletes the provided mesh from a storage
+     * @param rid Render-id of the mesh to be deleted
+     */
+    virtual void delete_mesh(Mesh::rid_t rid) = 0;
 
     /*!
-     * \brief Creates a new mesh with the given name.
-     *
-     * \param name Name of the mesh to be created.
-     *
-     * This method creates a new mesh identified by the provided name.
-     */
-    virtual void createMesh(std::string name) = 0;
-
-    /*!
-     * \brief Sets the transformation matrix for a mesh.
-     *
-     * \param name Name of the mesh.
+     * \brief Sets the transformation matrix for a mesh identified by render-id
+     * \param rid Render-id of the mesh to be transformed
      * \param transform Transformation matrix to be applied to the mesh.
-     *
-     * This method sets the transformation matrix for the mesh identified by the
-     * provided name.
      */
-    virtual void setMeshTransform(std::string name, glm::mat4x4 transform) = 0;
+    virtual void setMeshTransform(Mesh::rid_t rid, glm::mat4x4 transform) = 0;
+    /*!
+     * \brief Gets the transformation matrix of a mesh.
+     * \param rid Render-id of the mesh
+     * \return Returns a transform matrix of the mesh
+     */
+    virtual glm::mat4 get_mesh_transform(Mesh::rid_t rid) = 0;
+
+    /*!
+     * \brief Stores mesh data
+     */
+    struct MeshPair {
+        /*!
+         * \brief Pointer to the loaded mesh (GLTF)
+         */
+        std::shared_ptr<const Mesh::GLTF::LoadedGLTF> ptr;
+        /*!
+         * \brief Transform matrix of the mesh
+         */
+        glm::mat4 transform;
+    };
+
+    using MeshMap = std::unordered_map<Mesh::rid_t, MeshPair>;
+    /*!
+     * \brief Gets all the stored meshes
+     * \return Returns a MeshMap that stores pairs of the render-id of the mesh
+     * and the mesh data
+     */
+    virtual const MeshMap& get_meshes() = 0;
 
     /*!
      * \brief Retrieves the camera instance.
@@ -77,27 +97,11 @@ public:
      */
     [[nodiscard]] virtual Camera* getCamera() = 0;
 
-    /*! \brief
-     * Gets the chip handler from HIDAPI required to change the settings by the
-     * Controller
-     * @return
-     * Returns the device handler in case, can't be nullptr
+    /*!
+     * \brief Gets the stored engine
+     * \return Returns a ref to the engine
      */
-    //[[nodiscard]] virtual hid_device* getChipHandler() const = 0;
-
-    /*! \brief
-     * Requests from chip the level of brightness
-     * @return
-     * Returns the level of brightness [0; 100]
-     */
-    // virtual uint8_t getBrightness() = 0;
-
-    /*! \brief
-     * Requests RGB values from the chip
-     * @return
-     * Returns the struct with .R, .G, .B fields
-     */
-    // virtual Color getRGB() = 0;
+    virtual VulkanEngine& get_engine() = 0;
 
     using Ptr = std::shared_ptr<IModel>;
 };
