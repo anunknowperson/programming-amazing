@@ -1,3 +1,5 @@
 include(addGTest)
 
-# add targets by calling add_gtest
+# Add your test executable using add_gtest
+add_gtest(CameraTest CameraTest.cpp)
+add_gtest(CameraControllerTest CameraControllerTest.cpp)

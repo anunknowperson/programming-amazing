@@ -8,7 +8,7 @@ ModelImpl::~ModelImpl() {
     _engine.cleanup();
 }
 
-ModelImpl::ModelImpl() = default;
+ModelImpl::ModelImpl() : _cameraController(_camera) {}
 
 void ModelImpl::registerWindow(struct SDL_Window *window) {
     _engine.mainCamera = &_camera;
@@ -39,3 +39,7 @@ void ModelImpl::setMeshTransform(std::string name, glm::mat4x4 transform) {
         , _brightness { collectBrightness(_dev) }
         , _rgb { collectRGB(_dev) }
 {*/
+
+CameraController *ModelImpl::getCameraController() {
+    return &_cameraController;
+}

@@ -8,7 +8,8 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(googletest)
-add_library(GTest::GTest INTERFACE IMPORTED)
+add_library(GTest::GTest INTERFACE IMPORTED
+        ../src/core/CameraController.cpp)
 target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
 # keeps CACHE cleaner

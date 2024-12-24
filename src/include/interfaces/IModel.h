@@ -3,10 +3,12 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <string_view>
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_vulkan.h"
+#include "core/CameraController.h"
 #include "scene/Camera.h"
 
 /*!
@@ -75,7 +77,8 @@ public:
      * This method returns a pointer to the camera instance managed by the
      * model. Can be used to access and modify camera properties.
      */
-    [[nodiscard]] virtual Camera* getCamera() = 0;
+    virtual Camera* getCamera() = 0;
+    virtual CameraController* getCameraController() = 0;
 
     /*! \brief
      * Gets the chip handler from HIDAPI required to change the settings by the

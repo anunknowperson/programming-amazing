@@ -2,6 +2,7 @@
 
 #include <random>
 
+#include "core/CameraController.h"
 #include "core/Mesh.h"
 #include "scene/Camera.h"
 #include "vk_descriptors.h"
@@ -118,6 +119,7 @@ public:
     std::unordered_map<std::string, std::shared_ptr<LoadedGLTF>> loadedScenes;
 
     Camera* mainCamera;
+    CameraController* cameraController;
 
     DrawContext mainDrawContext;
     std::unordered_map<std::string, std::shared_ptr<ENode>> loadedNodes;
