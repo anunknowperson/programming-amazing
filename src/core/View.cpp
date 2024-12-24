@@ -1,7 +1,10 @@
 #include "core/View.h"
 
+#include <memory>
+#include <utility>
+
 #include "core/ViewImpl.h"
 
-IView::Ptr createView(IController::Ptr c_ptr, IModel::Ptr m_ptr) {
-    return std::make_unique<ViewImpl>(std::move(c_ptr), std::move(m_ptr));
+IView::Ptr createView(IController::Ptr controller, IModel::Ptr model) {
+    return std::make_unique<ViewImpl>(std::move(controller), std::move(model));
 }

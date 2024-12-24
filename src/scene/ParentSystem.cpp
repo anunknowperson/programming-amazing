@@ -1,7 +1,7 @@
 #include "scene/ParentSystem.h"
 
 namespace {
-void updateParent(flecs::entity e, Parent &p) {
+void updateParent(flecs::entity e, const Parent &p) {
     if (!p.parent.is_alive() || !p.parent.has<Child>()) {
         e.destruct();
     } else {
@@ -14,25 +14,28 @@ void updateParent(flecs::entity e, Parent &p) {
 
 void updateChild(Child &c) {
     auto &children = c.children;
-    auto newEnd = std::remove_if(
-            children.begin(), children.end(), [](const flecs::entity &child) {
+    const auto newEnd =
+            std::ranges::remove_if(children, [](const flecs::entity &child) {
                 return (!child.is_alive() || !child.has<Parent>());
-            });
+            }).begin();
     children.erase(newEnd, children.end());
 }
 
-void removeChild(flecs::entity e, Child &c) {
+void removeChild(flecs::entity e, const Child &c) {
     if (c.children.empty()) {
         e.remove<Child>();
     }
 }
 
-void changeParent(flecs::entity e, Parent &p, PreviousParent &pp) {
+void changeParent(flecs::entity e, Parent &p, const PreviousParent &pp) {
     if (pp.parent.is_alive() and pp.parent.has<Child>()) {
         auto *child = pp.parent.get_mut<Child>();
-        auto newEnd = std::remove_if(
-                child->children.begin(), child->children.end(),
-                [e](const flecs::entity &child) { return child == e; });
+        const auto newEnd =
+                std::ranges::remove_if(child->children,
+                                       [e](const flecs::entity &e_child) {
+                                           return e_child == e;
+                                       })
+                        .begin();
         child->children.erase(newEnd, child->children.end());
     }
     if (p.parent.is_alive()) {
@@ -74,8 +77,7 @@ void setRelation(flecs::entity child, flecs::entity parent) {
     }
     if (parent.has<Child>()) {
         auto &children = parent.get_mut<Child>()->children;
-        if (std::find(children.begin(), children.end(), child) !=
-            children.end()) {
+        if (std::ranges::find(children, child) != children.end()) {
             return;
         }
         children.push_back(child);
@@ -112,14 +114,16 @@ void removeRelation(flecs::entity removing_child, flecs::entity parent) {
     }
 #endif
     auto &children = parent.get_mut<Child>()->children;
-    auto newEnd = std::remove_if(children.begin(), children.end(),
-                                 [removing_child](const flecs::entity &child) {
-                                     return child == removing_child;
-                                 });
+    const auto newEnd = std::ranges::remove_if(
+                                children,
+                                [removing_child](const flecs::entity &child) {
+                                    return child == removing_child;
+                                })
+                                .begin();
     children.erase(newEnd, children.end());
 }
 
-void ParentSystem(flecs::world &world) {
+void ParentSystem(const flecs::world &world) {
     world.system<Parent>("UpdateParent").kind(flecs::OnAdd).each(updateParent);
 
     world.system<Child>("UpdateChild").kind(flecs::OnSet).each(updateChild);

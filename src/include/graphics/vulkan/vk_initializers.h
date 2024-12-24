@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "vk_types.h"
+#include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 namespace vkinit {
 //> init_cmd
@@ -18,22 +19,23 @@ VkFenceCreateInfo fence_create_info(VkFenceCreateFlags flags = 0);
 
 VkSemaphoreCreateInfo semaphore_create_info(VkSemaphoreCreateFlags flags = 0);
 
-VkSubmitInfo2 submit_info(VkCommandBufferSubmitInfo* cmd,
-                          VkSemaphoreSubmitInfo* signalSemaphoreInfo,
-                          VkSemaphoreSubmitInfo* waitSemaphoreInfo);
+VkSubmitInfo2 submit_info(const VkCommandBufferSubmitInfo* cmd,
+                          const VkSemaphoreSubmitInfo* signalSemaphoreInfo,
+                          const VkSemaphoreSubmitInfo* waitSemaphoreInfo);
 VkPresentInfoKHR present_info();
 
 VkRenderingAttachmentInfo attachment_info(
-        VkImageView view, VkClearValue* clear,
+        VkImageView view, const VkClearValue* clear,
         VkImageLayout layout /*= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL*/);
 
 VkRenderingAttachmentInfo depth_attachment_info(
         VkImageView view,
         VkImageLayout layout /*= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL*/);
 
-VkRenderingInfo rendering_info(VkExtent2D renderExtent,
-                               VkRenderingAttachmentInfo* colorAttachment,
-                               VkRenderingAttachmentInfo* depthAttachment);
+VkRenderingInfo rendering_info(
+        VkExtent2D renderExtent,
+        const VkRenderingAttachmentInfo* colorAttachment,
+        const VkRenderingAttachmentInfo* depthAttachment);
 
 VkImageSubresourceRange image_subresource_range(VkImageAspectFlags aspectMask);
 
@@ -42,15 +44,13 @@ VkSemaphoreSubmitInfo semaphore_submit_info(VkPipelineStageFlags2 stageMask,
 VkDescriptorSetLayoutBinding descriptorset_layout_binding(
         VkDescriptorType type, VkShaderStageFlags stageFlags, uint32_t binding);
 VkDescriptorSetLayoutCreateInfo descriptorset_layout_create_info(
-        VkDescriptorSetLayoutBinding* bindings, uint32_t bindingCount);
-VkWriteDescriptorSet write_descriptor_image(VkDescriptorType type,
-                                            VkDescriptorSet dstSet,
-                                            VkDescriptorImageInfo* imageInfo,
-                                            uint32_t binding);
-VkWriteDescriptorSet write_descriptor_buffer(VkDescriptorType type,
-                                             VkDescriptorSet dstSet,
-                                             VkDescriptorBufferInfo* bufferInfo,
-                                             uint32_t binding);
+        const VkDescriptorSetLayoutBinding* bindings, uint32_t bindingCount);
+VkWriteDescriptorSet write_descriptor_image(
+        VkDescriptorType type, VkDescriptorSet dstSet,
+        const VkDescriptorImageInfo* imageInfo, uint32_t binding);
+VkWriteDescriptorSet write_descriptor_buffer(
+        VkDescriptorType type, VkDescriptorSet dstSet,
+        const VkDescriptorBufferInfo* bufferInfo, uint32_t binding);
 VkDescriptorBufferInfo buffer_info(VkBuffer buffer, VkDeviceSize offset,
                                    VkDeviceSize range);
 

@@ -1,7 +1,11 @@
 #include "scene/Node.h"
 
+#include <utility>
+
+#include "core/Logging.h"
+
 Node::Node(std::shared_ptr<Node> parent, std::string name)
-    : _parent(parent), _name(name) {
+    : _parent(parent), _name(std::move(name)) {
     if (parent != nullptr) {
         parent->_child.push_back(shared_from_this());
     }
@@ -25,20 +29,20 @@ std::vector<std::shared_ptr<Node>> Node::get_children() const {
 
 std::shared_ptr<Node> Node::add_child() {
     Node child(*this);
-    std::shared_ptr<Node> child_ptr = std::make_shared<Node>(child);
+    auto child_ptr = std::make_shared<Node>(child);
     _child.push_back(child_ptr);
     return child_ptr;
 }
 
 void Node::remove_child(std::shared_ptr<Node> del_child) {
-    std::vector<std::shared_ptr<Node>>::iterator child_iter = _child.begin();
+    auto child_iter = _child.begin();
     auto del_child_iter = _child.end();
     while (child_iter != _child.end()) {
         if (*child_iter == del_child) {
             del_child_iter = child_iter;
             break;
         }
-        child_iter++;
+        ++child_iter;
     }
     if (del_child_iter == _child.end()) {
         LOGW("Not possible to delete a non-existent child");
@@ -51,6 +55,6 @@ std::string Node::get_name() const {
     return _name;
 }
 
-void Node::change_name(std::string new_name) {
+void Node::change_name(const std::string& new_name) {
     _name = new_name;
 }

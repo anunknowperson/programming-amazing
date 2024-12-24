@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "core/ModelImpl.h"
 
 IModel::Ptr createModel() {

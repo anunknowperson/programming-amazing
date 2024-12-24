@@ -1,6 +1,9 @@
 ﻿#include "graphics/vulkan/vk_pipelines.h"
 
+#include <cstdint>
+#include <fmt/base.h>
 #include <fstream>
+#include <spdlog/spdlog.h>
 
 #include "graphics/vulkan/vk_initializers.h"
 
@@ -24,7 +27,8 @@ bool vkutil::load_shader_module(const char* filePath, VkDevice device,
     }
     // spirv expects the buffer to be on uint32, so make sure to reserve a int
     // vector big enough for the entire file
-    std::vector<uint32_t> buffer(static_cast<uint32_t>(fileSize) / sizeof(uint32_t));
+    std::vector<uint32_t> buffer(static_cast<uint32_t>(fileSize) /
+                                 sizeof(uint32_t));
 
     // put file cursor at beginning
     file.seekg(0);
@@ -82,7 +86,7 @@ void PipelineBuilder::clear() {
     _shaderStages.clear();
 }
 
-VkPipeline PipelineBuilder::build_pipeline(VkDevice device) {
+VkPipeline PipelineBuilder::build_pipeline(VkDevice device) const {
     // make viewport state from our stored viewport and scissor.
     // at the moment we wont support multiple viewports or scissors
     VkPipelineViewportStateCreateInfo viewportState = {};
@@ -105,7 +109,7 @@ VkPipeline PipelineBuilder::build_pipeline(VkDevice device) {
     colorBlending.pAttachments = &_colorBlendAttachment;
 
     // completely clear VertexInputStateCreateInfo, as we have no need for it
-    VkPipelineVertexInputStateCreateInfo _vertexInputInfo = {
+    constexpr VkPipelineVertexInputStateCreateInfo _vertexInputInfo = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
     // build the actual pipeline
     // we now use all of the info structs we have been writing into into this
@@ -126,8 +130,8 @@ VkPipeline PipelineBuilder::build_pipeline(VkDevice device) {
     pipelineInfo.pDepthStencilState = &_depthStencil;
     pipelineInfo.layout = _pipelineLayout;
 
-    VkDynamicState state[] = {VK_DYNAMIC_STATE_VIEWPORT,
-                              VK_DYNAMIC_STATE_SCISSOR};
+    constexpr VkDynamicState state[] = {VK_DYNAMIC_STATE_VIEWPORT,
+                                        VK_DYNAMIC_STATE_SCISSOR};
 
     VkPipelineDynamicStateCreateInfo dynamicInfo = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
@@ -152,10 +156,10 @@ void PipelineBuilder::set_shaders(VkShaderModule vertexShader,
                                   VkShaderModule fragmentShader) {
     _shaderStages.clear();
 
-    _shaderStages.push_back(vkinit::pipeline_shader_stage_create_info(
+    _shaderStages.emplace_back(vkinit::pipeline_shader_stage_create_info(
             VK_SHADER_STAGE_VERTEX_BIT, vertexShader));
 
-    _shaderStages.push_back(vkinit::pipeline_shader_stage_create_info(
+    _shaderStages.emplace_back(vkinit::pipeline_shader_stage_create_info(
             VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader));
 }
 

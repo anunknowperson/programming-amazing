@@ -1,10 +1,21 @@
 ﻿#pragma once
 
+#include <cstdint>
 #include <filesystem>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <unordered_map>
+#include <vector>
+#include <vulkan/vulkan_core.h>
 
 #include "vk_descriptors.h"
 #include "vk_types.h"
+
+class VulkanEngine;
+struct DrawContext;
 
 struct GLTFMaterial {
     MaterialInstance data;
@@ -23,11 +34,8 @@ struct MeshAsset {
     GPUMeshBuffers meshBuffers;
 };
 
-// forward declaration
-class VulkanEngine;
-
 std::optional<std::vector<std::shared_ptr<MeshAsset>>> loadGltfMeshes(
-        VulkanEngine* engine, std::filesystem::path filePath);
+        VulkanEngine* engine, const std::filesystem::path& filePath);
 
 struct LoadedGLTF final : public IRenderable {
     LoadedGLTF() = default;

@@ -1,11 +1,6 @@
 #include "graphics/Graphics.h"
 
 namespace engine::graphics {
-
-Graphics::Graphics() {}
-
-Graphics::~Graphics() {}
-
 Graphics* Graphics::getInstance() {
     static Graphics singleton;
     return &singleton;
@@ -15,7 +10,7 @@ uint64_t Graphics::create_mesh_instance() {
     std::uint64_t new_index;
     std::uint64_t new_uid;
 
-    if (meshes.size() != 0) {
+    if (!meshes.empty()) {
         auto lastPair = *meshes.rbegin();
 
         new_index = lastPair.second + 1;
@@ -32,7 +27,8 @@ uint64_t Graphics::create_mesh_instance() {
     return new_uid;
 }
 
-void Graphics::set_mesh_instance_transform([[maybe_unused]] uint64_t rid, [[maybe_unused]] glm::mat4 matrix) {
+void Graphics::set_mesh_instance_transform([[maybe_unused]] uint64_t rid,
+                                           [[maybe_unused]] glm::mat4 matrix) {
     // VulkanRender::instances[meshes[rid]] = matrix;
 }
 
@@ -44,7 +40,7 @@ void Graphics::free_mesh_instance(uint64_t rid) {
 
     auto it = meshes.find(rid);
     if (it != meshes.end()) {
-        size_t index = it->second;
+        const size_t index = it->second;
         // VulkanRender::instances.erase( VulkanRender::instances.begin() +
         // index );
 

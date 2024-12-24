@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "core/Logging.h"
-
 /**
  * @class Node
  * @brief A class representing a node in a tree structure.
@@ -72,7 +70,7 @@ public:
      *
      * @param new_name The new name of the node.
      */
-    void change_name(std::string new_name);
+    void change_name(const std::string& new_name);
 
 private:
     const std::weak_ptr<Node> _parent;

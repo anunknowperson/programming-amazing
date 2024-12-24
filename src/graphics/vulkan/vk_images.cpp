@@ -1,5 +1,7 @@
 #include "graphics/vulkan/vk_images.h"
 
+#include <cstdint>
+
 #include "graphics/vulkan/vk_initializers.h"
 
 void vkutil::transition_image(VkCommandBuffer cmd, VkImage image,
@@ -18,10 +20,10 @@ void vkutil::transition_image(VkCommandBuffer cmd, VkImage image,
     imageBarrier.oldLayout = currentLayout;
     imageBarrier.newLayout = newLayout;
 
-    VkImageAspectFlags aspectMask =
+    const auto aspectMask = static_cast<VkImageAspectFlags>(
             (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
                     ? VK_IMAGE_ASPECT_DEPTH_BIT
-                    : VK_IMAGE_ASPECT_COLOR_BIT;
+                    : VK_IMAGE_ASPECT_COLOR_BIT);
     imageBarrier.subresourceRange = vkinit::image_subresource_range(aspectMask);
     imageBarrier.image = image;
 

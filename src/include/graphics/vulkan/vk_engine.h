@@ -1,13 +1,29 @@
 ﻿#pragma once
 
-#include <random>
+#include <cstddef>
+#include <cstdint>
+#include <deque>
+#include <functional>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_float4.hpp>
+#include <memory>
+#include <ranges>
+#include <span>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <vk_mem_alloc.h>
+#include <vulkan/vk_platform.h>
+#include <vulkan/vulkan_core.h>
 
-#include "core/Mesh.h"
-#include "scene/Camera.h"
 #include "vk_descriptors.h"
-#include "vk_loader.h"
-#include "vk_pipelines.h"
 #include "vk_types.h"
+
+class Camera;
+class VulkanEngine;
+struct DrawContext;
+struct LoadedGLTF;
+struct MeshAsset;
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -53,8 +69,8 @@ struct DeletionQueue {
 
     void flush() {
         // reverse iterate the deletion queue to execute all the functions
-        for (auto it = deletors.rbegin(); it != deletors.rend(); it++) {
-            (*it)();  // call functors
+        for (auto& deletor : std::ranges::reverse_view(deletors)) {
+            deletor();  // call functors
         }
 
         deletors.clear();
@@ -106,7 +122,7 @@ struct DrawContext {
 
 class VulkanEngine {
 public:
-    int64_t registerMesh(std::string filePath);
+    int64_t registerMesh(const std::string& filePath);
     void unregisterMesh(int64_t id);
 
     void setMeshTransform(int64_t id, glm::mat4 mat);
@@ -197,7 +213,8 @@ public:
 
     GPUMeshBuffers rectangle;
 
-    void immediate_submit(std::function<void(VkCommandBuffer cmd)>&& function);
+    void immediate_submit(
+            std::function<void(VkCommandBuffer cmd)>&& function) const;
     GPUMeshBuffers uploadMesh(std::span<uint32_t> indices,
                               std::span<Vertex> vertices);
 
@@ -212,9 +229,9 @@ public:
     AllocatedImage create_image(VkExtent3D size, VkFormat format,
                                 VkImageUsageFlags usage,
                                 bool mipmapped = false) const;
-    AllocatedImage create_image(void* data, VkExtent3D size, VkFormat format,
-                                VkImageUsageFlags usage,
-                                bool mipmapped = false);
+    AllocatedImage create_image(const void* data, VkExtent3D size,
+                                VkFormat format, VkImageUsageFlags usage,
+                                bool mipmapped = false) const;
     void destroy_image(const AllocatedImage& img) const;
 
     AllocatedImage _whiteImage;
@@ -248,7 +265,7 @@ private:
     void create_swapchain(uint32_t width, uint32_t height);
     void destroy_swapchain();
 
-    void draw_background(VkCommandBuffer cmd);
+    void draw_background(VkCommandBuffer cmd) const;
 
     void init_descriptors();
 

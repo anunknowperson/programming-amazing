@@ -2,7 +2,8 @@
 
 //> init_cmd
 VkCommandPoolCreateInfo vkinit::command_pool_create_info(
-        [[maybe_unused]] uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags /*= 0*/) {
+        [[maybe_unused]] uint32_t queueFamilyIndex,
+        VkCommandPoolCreateFlags flags /*= 0*/) {
     VkCommandPoolCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     info.pNext = nullptr;
@@ -86,9 +87,10 @@ VkCommandBufferSubmitInfo vkinit::command_buffer_submit_info(
     return info;
 }
 
-VkSubmitInfo2 vkinit::submit_info(VkCommandBufferSubmitInfo* cmd,
-                                  VkSemaphoreSubmitInfo* signalSemaphoreInfo,
-                                  VkSemaphoreSubmitInfo* waitSemaphoreInfo) {
+VkSubmitInfo2 vkinit::submit_info(
+        const VkCommandBufferSubmitInfo* cmd,
+        const VkSemaphoreSubmitInfo* signalSemaphoreInfo,
+        const VkSemaphoreSubmitInfo* waitSemaphoreInfo) {
     VkSubmitInfo2 info = {};
     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
     info.pNext = nullptr;
@@ -110,7 +112,7 @@ VkSubmitInfo2 vkinit::submit_info(VkCommandBufferSubmitInfo* cmd,
 VkPresentInfoKHR vkinit::present_info() {
     VkPresentInfoKHR info = {};
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    info.pNext = 0;
+    info.pNext = nullptr;
 
     info.swapchainCount = 0;
     info.pSwapchains = nullptr;
@@ -123,7 +125,7 @@ VkPresentInfoKHR vkinit::present_info() {
 
 //> color_info
 VkRenderingAttachmentInfo vkinit::attachment_info(
-        VkImageView view, VkClearValue* clear,
+        VkImageView view, const VkClearValue* clear,
         VkImageLayout layout /*= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL*/) {
     VkRenderingAttachmentInfo colorAttachment{};
     colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -162,8 +164,9 @@ VkRenderingAttachmentInfo vkinit::depth_attachment_info(
 //< depth_info
 //> render_info
 VkRenderingInfo vkinit::rendering_info(
-        VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment,
-        VkRenderingAttachmentInfo* depthAttachment) {
+        VkExtent2D renderExtent,
+        const VkRenderingAttachmentInfo* colorAttachment,
+        const VkRenderingAttachmentInfo* depthAttachment) {
     VkRenderingInfo renderInfo{};
     renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
     renderInfo.pNext = nullptr;
@@ -208,7 +211,7 @@ VkDescriptorSetLayoutBinding vkinit::descriptorset_layout_binding(
 }
 
 VkDescriptorSetLayoutCreateInfo vkinit::descriptorset_layout_create_info(
-        VkDescriptorSetLayoutBinding* bindings, uint32_t bindingCount) {
+        const VkDescriptorSetLayoutBinding* bindings, uint32_t bindingCount) {
     VkDescriptorSetLayoutCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     info.pNext = nullptr;
@@ -222,7 +225,7 @@ VkDescriptorSetLayoutCreateInfo vkinit::descriptorset_layout_create_info(
 
 VkWriteDescriptorSet vkinit::write_descriptor_image(
         VkDescriptorType type, VkDescriptorSet dstSet,
-        VkDescriptorImageInfo* imageInfo, uint32_t binding) {
+        const VkDescriptorImageInfo* imageInfo, uint32_t binding) {
     VkWriteDescriptorSet write = {};
     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     write.pNext = nullptr;
@@ -238,7 +241,7 @@ VkWriteDescriptorSet vkinit::write_descriptor_image(
 
 VkWriteDescriptorSet vkinit::write_descriptor_buffer(
         VkDescriptorType type, VkDescriptorSet dstSet,
-        VkDescriptorBufferInfo* bufferInfo, uint32_t binding) {
+        const VkDescriptorBufferInfo* bufferInfo, uint32_t binding) {
     VkWriteDescriptorSet write = {};
     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     write.pNext = nullptr;

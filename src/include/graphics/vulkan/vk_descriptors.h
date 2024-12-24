@@ -1,8 +1,11 @@
 ﻿#pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <deque>
 #include <span>
-
-#include "graphics/vulkan/vk_types.h"
+#include <vector>
+#include <vulkan/vulkan_core.h>
 
 struct DescriptorLayoutBuilder {
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -11,7 +14,7 @@ struct DescriptorLayoutBuilder {
     void clear();
     VkDescriptorSetLayout build(VkDevice device,
                                 VkShaderStageFlags shaderStages,
-                                void* pNext = nullptr,
+                                const void* pNext = nullptr,
                                 VkDescriptorSetLayoutCreateFlags flags = 0);
 };
 
@@ -25,10 +28,11 @@ struct DescriptorAllocator {
 
     void init_pool(VkDevice device, uint32_t maxSets,
                    std::span<PoolSizeRatio> poolRatios);
-    void clear_descriptors(VkDevice device);
-    void destroy_pool(VkDevice device);
+    void clear_descriptors(VkDevice device) const;
+    void destroy_pool(VkDevice device) const;
 
-    VkDescriptorSet allocate(VkDevice device, VkDescriptorSetLayout layout);
+    VkDescriptorSet allocate(VkDevice device,
+                             VkDescriptorSetLayout layout) const;
 };
 
 struct DescriptorAllocatorGrowable {
@@ -44,7 +48,7 @@ public:
     void destroy_pools(VkDevice device);
 
     VkDescriptorSet allocate(VkDevice device, VkDescriptorSetLayout layout,
-                             void* pNext = nullptr);
+                             const void* pNext = nullptr);
 
 private:
     VkDescriptorPool get_pool(VkDevice device);

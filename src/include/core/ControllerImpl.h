@@ -1,5 +1,8 @@
 #pragma once
 
+#include <SDL_events.h>
+#include <memory>
+
 #include "IController.h"
 #include "interfaces/IModel.h"
 

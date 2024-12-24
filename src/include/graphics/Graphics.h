@@ -35,11 +35,11 @@ public:
 
     void free_mesh_instance(std::uint64_t rid);
 
-    ~Graphics();
+    ~Graphics() = default;
 
 private:
     /*! \brief ctor */
-    Graphics();
+    Graphics() = default;
 
     std::map<std::uint64_t, std::uint64_t> meshes;
 };

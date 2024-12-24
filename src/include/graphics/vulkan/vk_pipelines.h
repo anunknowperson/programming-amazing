@@ -1,5 +1,7 @@
 ﻿#pragma once
-#include "vk_types.h"
+
+#include <vector>
+#include <vulkan/vulkan_core.h>
 
 namespace vkutil {
 
@@ -27,7 +29,7 @@ public:
 
     void clear();
 
-    VkPipeline build_pipeline(VkDevice device);
+    VkPipeline build_pipeline(VkDevice device) const;
 
     void set_shaders(VkShaderModule vertexShader,
                      VkShaderModule fragmentShader);
