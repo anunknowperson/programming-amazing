@@ -30,7 +30,7 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::build(
     info.flags = flags;
 
     VkDescriptorSetLayout set;
-    VK_CHECK(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
+    vk_check(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
 
     return set;
 }
@@ -72,7 +72,7 @@ VkDescriptorSet DescriptorAllocator::allocate(VkDevice device,
     allocInfo.pSetLayouts = &layout;
 
     VkDescriptorSet ds;
-    VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, &ds));
+    vk_check(vkAllocateDescriptorSets(device, &allocInfo, &ds));
 
     return ds;
 }
@@ -178,7 +178,7 @@ VkDescriptorSet DescriptorAllocatorGrowable::allocate(
         poolToUse = get_pool(device);
         allocInfo.descriptorPool = poolToUse;
 
-        VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, &ds));
+        vk_check(vkAllocateDescriptorSets(device, &allocInfo, &ds));
     }
 
     readyPools.push_back(poolToUse);
