@@ -1,0 +1,67 @@
+name: Codestyle
+on:
+  pull_request:
+    paths-ignore:
+      - .gitmodules
+      - README.md
+      - shaders/**
+      - assets/**
+      - vcpkg/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - out.*
+jobs:
+  clang-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Pull clang-format
+        run: |
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main'
+          wget https://apt.llvm.org/llvm-snapshot.gpg.key
+          sudo apt-key add llvm-snapshot.gpg.key
+          sudo apt-get update
+          sudo apt-get install -y clang-format-18
+      - name: Check formatting
+        run: |
+          set +e
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-18 -p 1)
+
+          if [ "$formatterOutput" != "" ]
+          then
+            echo ":x: :x: :x:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`c++" >> $GITHUB_STEP_SUMMARY
+            echo "$formatterOutput" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$formatterOutput"
+            exit 1
+          fi
+
+          echo "$formatterOutput"
+          echo "### $formatterOutput :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+
+  clang-tidy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate compile_commands.json
+        run: |
+          cmake --preset lx64-debug \
+          . -B ${{github.workspace}}/build
+
+      - uses: ZedThree/clang-tidy-review@v0.19.0
+        id: review
+        with:
+          apt_packages: libboost-dev
+          build_dir: ${{github.workspace}}/build
+          config_file: '.clang-tidy'
+          split_workflow: true
+
+      - uses: ZedThree/clang-tidy-review/upload@v0.19.0
+
+      - name: Fail the check if clang-tidy reported issues
+        if: steps.review.outputs.total_comments > 0
+        run: exit 1
