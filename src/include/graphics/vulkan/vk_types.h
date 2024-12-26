@@ -15,13 +15,11 @@
 #include "vk_mem_alloc.h"
 #include "vulkan/vulkan.h"
 
-#define VK_CHECK(x)                                      \
-    do {                                                 \
-        VkResult err = x;                                \
-        if (err) {                                       \
-            LOGE("Detected Vulkan error: {}", (int)err); \
-        }                                                \
-    } while (0)
+inline void vk_check(const VkResult err) {
+    if (err != VK_SUCCESS) {
+        LOGE("Detected Vulkan error: {}", static_cast<int>(err));
+    }
+}
 
 struct AllocatedImage {
     VkImage image;

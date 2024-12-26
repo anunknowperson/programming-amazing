@@ -1,6 +1,6 @@
 #include "core/Mesh.h"
 
-Mesh::Mesh(std::string filePath) {
+Mesh::Mesh(const std::filesystem::path &filePath) {
     VulkanEngine &engine = VulkanEngine::Get();
 
     _rid = engine.registerMesh(filePath);

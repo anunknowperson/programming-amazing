@@ -106,7 +106,7 @@ struct DrawContext {
 
 class VulkanEngine {
 public:
-    int64_t registerMesh(std::string filePath);
+    int64_t registerMesh(const std::filesystem::path& filePath);
     void unregisterMesh(int64_t id);
 
     void setMeshTransform(int64_t id, glm::mat4 mat);

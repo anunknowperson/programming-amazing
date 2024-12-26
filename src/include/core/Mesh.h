@@ -7,7 +7,7 @@
 
 class Mesh {
 public:
-    Mesh(std::string filePath);
+    Mesh(const std::filesystem::path& filePath);
     ~Mesh();
 
     void set_transform(glm::mat4 t);

@@ -137,7 +137,7 @@ VkPipeline PipelineBuilder::build_pipeline(VkDevice device) {
     pipelineInfo.pDynamicState = &dynamicInfo;
 
     // its easy to error out on create graphics pipeline, so we handle it a bit
-    // better than the common VK_CHECK case
+    // better than the common vk_check case
     VkPipeline newPipeline;
     if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo,
                                   nullptr, &newPipeline) != VK_SUCCESS) {

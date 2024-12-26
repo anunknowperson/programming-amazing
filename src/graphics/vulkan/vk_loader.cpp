@@ -12,6 +12,8 @@
 #include <fastgltf/glm_element_traits.hpp>
 #include <fastgltf/tools.hpp>
 #include <fastgltf/types.hpp>
+#include <filesystem>
+#include <fmt/std.h>
 #include <glm/gtx/quaternion.hpp>
 
 std::optional<std::vector<std::shared_ptr<MeshAsset>>> loadGltfMeshes(
@@ -187,10 +189,9 @@ VkSamplerMipmapMode extract_mipmap_mode(fastgltf::Filter filter) {
     }
 }
 
-std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(VulkanEngine* engine,
-                                                    std::string_view filePath) {
-    fmt::print("Loading GLTF: {}", filePath);
-
+std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(
+        VulkanEngine* engine, const std::filesystem::path& path) {
+    fmt::println("Loading GLTF: {}", path);
     std::shared_ptr<LoadedGLTF> scene = std::make_shared<LoadedGLTF>();
     scene->creator = engine;
     LoadedGLTF& file = *scene.get();
@@ -204,11 +205,9 @@ std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(VulkanEngine* engine,
     // fastgltf::Options::LoadExternalImages;
 
     fastgltf::GltfDataBuffer data;
-    data.loadFromFile(filePath);
+    data.loadFromFile(path);
 
     fastgltf::Asset gltf;
-
-    std::filesystem::path path = filePath;
 
     auto type = fastgltf::determineGltfFileType(&data);
     if (type == fastgltf::GltfType::glTF) {
@@ -241,7 +240,9 @@ std::optional<std::shared_ptr<LoadedGLTF>> loadGltf(VulkanEngine* engine,
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3},
             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1}};
 
-    file.descriptorPool.init(engine->_device, static_cast<uint32_t>(gltf.materials.size()), sizes);
+    file.descriptorPool.init(engine->_device,
+                             static_cast<uint32_t>(gltf.materials.size()),
+                             sizes);
 
     // load samplers
     for (fastgltf::Sampler& sampler : gltf.samplers) {
